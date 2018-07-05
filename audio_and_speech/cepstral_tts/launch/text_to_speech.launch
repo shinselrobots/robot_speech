@@ -1,0 +1,5 @@
+<!-- Just start text_to_speech for testing -->
+<launch>
+  <node pkg="robot_sounds" type="speech_server.py" name="speech_service" output="screen"/>
+</launch>
+

@@ -1,0 +1,98 @@
+{
+  "manifest": {
+    "displayName": "Robot Commands",
+    "invocationName": "Robot Commands",
+    "category": "PRODUCTIVITY"
+  },
+  "actions": [
+    {
+      "name": "com.shinselrobots.actions.RobotCommands",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.Turn",
+        "parameters": [
+          {
+            "name": "amount",
+            "type": "Amount"
+          },
+          {
+            "name": "direction",
+            "type": "Direction"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "turn ($Direction:direction)? ($Amount:amount)?",
+            "turn ($Amount:amount)? ($Direction:direction)?"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "Turning $direction"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.Turn",
+                  "params": {
+                    "direction": "$direction",
+                    "amount": "$amount"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "$Direction",
+      "entities": [
+        {
+          "key": "RIGHT",
+          "synonyms": [
+            "right"
+          ]
+        },
+        {
+          "key": "LEFT",
+          "synonyms": [
+            "left"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "$Amount",
+      "entities": [
+        {
+          "key": "SMALL",
+          "synonyms": [
+            "a little",
+            "slightly",
+            "slight"
+          ]
+        },
+        {
+          "key": "LARGE",
+          "synonyms": [
+            "hard"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>speech_recognition_common</name>
+  <version>0.0.1</version>
+  <description>speech recognition common files</description>
+  
+  <maintainer email="shinsel.robots@gmail.com">Dave Shinsel</maintainer>
+  <license>Apache-2</license>
+  <author>Dave Shinsel</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+  <export>
+  </export>
+</package>

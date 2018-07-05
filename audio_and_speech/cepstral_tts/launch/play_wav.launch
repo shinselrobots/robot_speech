@@ -1,0 +1,4 @@
+<!-- Just start play_wav for testing --><launch>
+  <node pkg="robot_sounds" type="sound_server.py" name="sound_service" output="screen"/>
+</launch>
+

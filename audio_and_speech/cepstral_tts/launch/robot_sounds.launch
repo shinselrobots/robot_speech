@@ -1,0 +1,10 @@
+<launch>
+
+  <!-- Text To Speech Server - the Robot's Voice -->
+  <node pkg="robot_sounds" type="speech_server.py" name="speech_service" output="screen"/>
+
+  <!-- Sound Effects Server - Play wav files (maybe even music - probably needs work?) -->
+  <node pkg="robot_sounds" type="sound_server.py" name="sound_service" output="screen"/>
+
+</launch>
+

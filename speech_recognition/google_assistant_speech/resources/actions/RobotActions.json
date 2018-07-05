@@ -1,0 +1,807 @@
+{
+  "manifest": {
+    "displayName": "Robot Commands",
+    "invocationName": "Robot Commands",
+    "category": "PRODUCTIVITY"
+  },
+  "actions": [
+    {
+      "name": "com.shinselrobots.actions.stop",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.stop",
+        "trigger": {
+          "queryPatterns": [
+            "stop"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "stopping"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.stop",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.turn",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.turn",
+        "parameters": [
+          {
+            "name": "amount",
+            "type": "Amount"
+          },
+          {
+            "name": "turn_direction",
+            "type": "TurnDirection"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "turn ($TurnDirection:turn_direction)? ($Amount:amount)?",
+            "turn ($Amount:amount)? ($TurnDirection:turn_direction)?"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "turning $turn_direction"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.turn",
+                  "params": {
+                    "turn_direction": "$turn_direction",
+                    "amount": "$amount"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.spin",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.spin",
+        "parameters": [
+          {
+            "name": "turn_direction",
+            "type": "TurnDirection"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "spin ($TurnDirection:turn_direction)?"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "spinning $turn_direction"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.spin",
+                  "params": {
+                    "turn_direction": "$turn_direction"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.move",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.move",
+        "parameters": [
+          {
+            "name": "amount",
+            "type": "Amount"
+          },
+          {
+            "name": "move_direction",
+            "type": "MoveDirection"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "move ($MoveDirection:move_direction)? ($Amount:amount)?",
+            "move ($Amount:amount)? ($MoveDirection:move_direction)?"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "moving $move_direction"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.move",
+                  "params": {
+                    "move_direction": "$move_direction",
+                    "amount": "$amount"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.sleep",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.sleep",
+        "trigger": {
+          "queryPatterns": [
+            "go to sleep"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "shutting down"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.sleep",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.wake",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.wake",
+        "trigger": {
+          "queryPatterns": [
+            "wake up"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.wake",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.hands_up",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.hands_up",
+        "trigger": {
+          "queryPatterns": [
+            "put your hands up"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.hands_up",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.arms_home",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.arms_home",
+        "trigger": {
+          "queryPatterns": [
+            "hands down",
+            "arm home",
+            "arms home"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.arms_home",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.follow",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.follow",
+        "trigger": {
+          "queryPatterns": [
+            "follow me"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok, I will follow you"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.follow",
+                  "params": {
+                    "param1": "param1",
+                    "param2": "param2"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.microphone_off",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.microphone_off",
+        "trigger": {
+          "queryPatterns": [
+            "microphone off",
+            "dont listen"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok, I will stop listening"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.microphone_off",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.microphone_on",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.microphone_on",
+        "trigger": {
+          "queryPatterns": [
+            "microphone on",
+            "start listening",
+            "turn your microphone on"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok, I am all ears"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.microphone_on",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.toggle_lights",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.toggle_lights",
+        "trigger": {
+          "queryPatterns": [
+            "turn your lights on",
+            "turn your lights off"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.toggle_lights",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.sing_believer",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.sing_believer",
+        "trigger": {
+          "queryPatterns": [
+            "sing believer"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.sing_believer",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.bow",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.bow",
+        "trigger": {
+          "queryPatterns": [
+            "take a bow"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.bow",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.intro",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.intro",
+        "trigger": {
+          "queryPatterns": [
+            "introduce yourself"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.intro",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.who_is_president",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.who_is_president",
+        "trigger": {
+          "queryPatterns": [
+            "who is the president"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "I hear it is Donald Trump, but that may just be fake news"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.who_is_president",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.wave",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.wave",
+        "trigger": {
+          "queryPatterns": [
+            "say hello"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.wave",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.head_center",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.head_center",
+        "trigger": {
+          "queryPatterns": [
+            "look forward",
+            "head center"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.head_center",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+
+  ],
+  "types": [
+    {
+      "name": "$TurnDirection",
+      "entities": [
+        {
+          "key": "RIGHT",
+          "synonyms": [
+            "right"
+          ]
+        },
+        {
+          "key": "LEFT",
+          "synonyms": [
+            "left"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "$MoveDirection",
+      "entities": [
+        {
+          "key": "FORWARD",
+          "synonyms": [
+            "forward",
+            "ahead",
+            "closer"
+          ]
+        },
+        {
+          "key": "BACKWARD",
+          "synonyms": [
+            "back"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "$Amount",
+      "entities": [
+        {
+          "key": "SMALL",
+          "synonyms": [
+            "a little",
+            "slightly",
+            "slight"
+          ]
+        },
+        {
+          "key": "LARGE",
+          "synonyms": [
+            "hard"
+          ]
+        }
+      ]
+    }
+  ]
+}

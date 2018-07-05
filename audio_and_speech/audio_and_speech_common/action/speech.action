@@ -1,0 +1,8 @@
+#goal definition
+string text_to_speak 
+---
+#result definition
+bool complete
+---
+#feedback
+bool running 

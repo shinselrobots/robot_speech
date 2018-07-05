@@ -1,0 +1,12 @@
+<launch>
+    <!-- Cloud Speech Keys for Houndify
+         1. YOU MUST GET AN ACCOUNT:  www.houndify.com
+    	 2. Then set your keys as a bash environment variables (perhaps in your .bashrc?): 
+            export houndify_client_id="APxxxxxxxx=="
+            export houndify_client_key="iAxxxxxxxxxxxxxxxx=="
+    -->
+    
+    <param name="houndify_client_id"  type="string" value="$(env houndify_client_id)" /> 
+    <param name="houndify_client_key" type="string" value="$(env houndify_client_key)" /> 
+  </launch>
+

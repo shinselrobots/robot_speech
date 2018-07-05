@@ -1,0 +1,20 @@
+<launch>
+  <node pkg="houndify_cloud_speech" type="houndify_cloud_speech.py" name="houndify_cloud_speech_recognition" output="screen"/>
+
+    <!-- Key Phrase spotting using Snowboy -->
+    <param name="key_phrase_dir" type="string" value="$(find houndify_cloud_speech)/resources" />
+    <param name="key_phrase_1" type="string" value="sheldon.pmdl" /> <!-- Personal model -->
+    <param name="key_phrase_2" type="string" value="alexa.umdl" />   <!-- Universal model (for anyone's voice) -->
+ 
+    <include file="$(find houndify_cloud_speech)/launch/houndify_keys.launch"/>
+    <!-- WARNING! THIS WILL FAIL unless you get an account and insert your keys.  See:  houndify_keys_EXAMPLE_.launch -->
+
+    <!-- Tell Houndify where we are (local weather, etc.) -->
+    <!-- For testing, pick Hillsboro, Oregon -->
+    <param name="location_latitude" type="double" value="45.5231" /> 
+    <param name="location_longitude" type="double" value="122.2665" /> 
+
+    <param name="proxyUrl" type="string" value="" /> 
+    <!--  <param name="proxyUrl" type="string" value="$(env https_proxy)" /> --> 
+  </launch>
+

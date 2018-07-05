@@ -1,0 +1,216 @@
+commands:
+  
+- description: 'Tell a star wars joke command'
+  required_word_lists:
+  - 'tell star wars joke'
+  - 'tell star wars jokes'
+  - 'know star wars jokes'
+  intent: PY_TELL_A_JOKE
+  param1: 2
+
+- description: 'Tell a joke command'
+  required_word_lists:
+  - 'another joke'
+  - 'some more jokes'
+  intent: PY_TELL_A_JOKE
+  param1: 3
+
+- description: 'Tell a joke command'
+  required_word_lists:
+  - 'tell a joke'
+  - 'tell some joke'
+  - 'tell some jokes'
+  intent: PY_TELL_A_JOKE
+  param1: 1
+
+- description: 'Thank You'
+  required_word_lists:
+  - 'thank you'
+  - 'thanks'
+  intent: SAY
+  param1: 'You are welcome.'
+
+- description: 'Tell time command'
+  required_word_lists:
+  - 'what time'
+  intent: TELL_TIME
+
+- description: 'bow command'
+  required_word_lists:
+  - 'take a bow'
+  intent: BOW_GREETING
+
+- description: 'Introduce yourself command'
+  required_word_lists:
+  - 'introduce yourself'
+  intent: TELL_INTRO
+
+- description: 'wave command'
+  required_word_lists:
+  - 'wave'
+  - 'hello'
+  intent: WAVE
+
+- description: 'head center command'
+  required_word_lists:
+  - 'head center'
+  - 'look forward'
+  intent: HEAD_CENTER
+
+- description: 'wakeup command'
+  required_word_lists:
+  - 'wake up'
+  intent: WAKEUP
+
+- description: 'sleep command'
+  required_word_lists:
+  - 'go to sleep'
+  - 'sleep'
+  intent: SLEEP
+
+- description: 'hands up command'
+  required_word_lists:
+  - 'hands up'
+  - 'put your hands up'
+  intent: HANDS_UP
+
+- description: 'head center command'
+  required_word_lists:
+  - 'head center'
+  - 'look forward'
+  intent: HEAD_CENTER
+
+- description: 'joint test command'
+  required_word_lists:
+  - 'test joints'
+  - 'test joint positions'
+  intent: TEST_JOINTS
+
+- description: 'Presidential reference'
+  required_word_lists:
+  - 'who was elected'
+  - 'who is president'
+  - 'won election'
+  intent: SAY
+  param1: 'I hear it is Donald Trump.  But, that might just be fake news.'
+
+- description: 'Stop command'
+  required_word_lists:
+  - 'stop'
+  intent: STOP
+
+- description: 'Turn a little right'
+  required_word_lists:
+  - 'turn slight right'
+  - 'turn little right'
+  intent: TURN
+  param1: -45.0 # right turn
+  param2: 1.5   # speed
+
+- description: 'Turn a little left'
+  required_word_lists:
+  - 'turn slight left'
+  - 'turn little left'
+  intent: TURN
+  param1: 45.0  # left turn
+  param2: 1.5   # speed
+
+- description: 'Turn right'
+  required_word_lists:
+  - 'turn right'
+  intent: TURN
+  param1: -90.0
+  param2: 1.5
+
+- description: 'Turn left'
+  required_word_lists:
+  - 'turn left'
+  intent: TURN
+  param1: 90.0
+  param2: 1.5
+
+- description: 'Spin right'
+  required_word_lists:
+  - 'spin right'
+  - 'spinrite'
+  intent: TURN
+  param1: -180.0
+  param2: 1.5
+
+- description: 'Spin left'
+  required_word_lists:
+  - 'spin left'
+  - 'spinleft'
+  intent: TURN
+  param1: 180.0
+  param2: 1.5
+
+- description: 'Move a little closer'
+  required_word_lists:
+  - 'move little forward'
+  - 'move little ford'
+  - 'come closer little'
+  - 'come forward little'
+  intent: MOVE
+  param1: 0.5   # distance in meters (positive = forward)
+  param2: 0.5   # speed in meters/sec
+
+- description: 'Move closer'
+  required_word_lists:
+  - 'move forward'
+  - 'come closer'
+  - 'come forward'  
+  intent: MOVE
+  param1: 1.0
+  param2: 0.5
+
+- description: 'Move a little farther'
+  required_word_lists:
+  - 'move little back'
+  - 'back little'
+  - 'backup little'
+  intent: MOVE
+  param1: -0.5
+  param2: 0.5
+
+- description: 'Move farther'
+  required_word_lists:
+  - 'move back'
+  - 'back'
+  - 'backup'
+  intent: MOVE
+  param1: -1.0
+  param2: 0.5
+
+- description: 'Follow me'
+  required_word_lists:
+  - 'follow me'
+  intent: FOLLOW_ME
+
+- description: 'Microphone Off'
+  required_word_lists:
+  - 'microphone off'
+  - 'disable microphone'
+  - 'dont listen'
+  intent: MICROPHONE_OFF
+
+- description: 'Microphone On'
+  required_word_lists:
+  - 'microphone enabled by user'
+  intent: MICROPHONE_ON
+
+- description: 'Arm Lights toggle'
+  required_word_lists:
+  - 'lights on'
+  - 'lights off'
+  intent: ARM_LIGHTS_TOGGLE
+
+- description: 'Sing believer'
+  required_word_lists:
+  - 'sing us a song'
+  - 'sing believer'
+  intent: CLEAN_UP
+  param1: 'script_believer.csv'
+
+
+

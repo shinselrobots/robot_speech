@@ -1,0 +1,5 @@
+string phrase_heard
+string suggested_response
+bool partial_phrase
+---
+bool result

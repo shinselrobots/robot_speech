@@ -1,0 +1,7 @@
+<launch>
+
+  <include file="$(find robot_sounds)/launch/robot_sounds.launch"/>
+
+  <include file="$(find speech_handler)/launch/speech_handler.launch"/>
+  <include file="$(find google_cloud_speech)/launch/google_cloud_speech.launch"/>
+</launch>
