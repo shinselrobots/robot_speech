@@ -5,11 +5,7 @@
 2. Provides "Play" a sound (wav file) functionality via python pyaudio
 
 ## Installation Instructions:
-Install foundation
-- Install Ubuntu, ROS Kinetic, etc.
-- git clone or install robot_common
 - Install this package
-
 
 Install text to speech
 - uncompress tar file
@@ -20,7 +16,8 @@ Install text to speech
 
 
 Install wav playback for python
-sudo apt -y install python-pyaudio
+(this should have already been done during speech recognition install)
+sudo apt -y install python-pyaudio 
 
 ## Try it - Test python (troubleshoot sound is working)
 - In the GUI, System Settings --> Sound --> Test Sound

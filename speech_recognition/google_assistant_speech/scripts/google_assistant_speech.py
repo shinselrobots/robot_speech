@@ -28,9 +28,20 @@ from std_msgs.msg import UInt32
 import snowboydecoder
 import sys
 import signal
-import speech_recognition as sr
+#import speech_recognition as sr
 import os
 import urllib2 # internet detection
+
+# for local text to speech (if not using Google Assistant voice)
+import actionlib
+import actionlib.action_client
+import audio_and_speech_common.msg
+
+# for sending commands to the behavior engine
+from behavior_common.msg import CommandState
+from std_msgs.msg import Bool
+from std_msgs.msg import UInt16
+from std_msgs.msg import UInt32
 
 
 # from Google Assistant pushtotalk sample
@@ -56,32 +67,34 @@ from google.assistant.embedded.v1alpha2 import (
 )
 from tenacity import retry, stop_after_attempt, retry_if_exception
 
-# DAVES Removed Try/Except
 import assistant_helpers
 import audio_helpers
 import browser_helpers
 import device_helpers
+#import robot_command_handlers
 
+# CONSTANTS
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.AssistResponse.END_OF_UTTERANCE
 DIALOG_FOLLOW_ON = embedded_assistant_pb2.DialogStateOut.DIALOG_FOLLOW_ON
 CLOSE_MICROPHONE = embedded_assistant_pb2.DialogStateOut.CLOSE_MICROPHONE
 PLAYING = embedded_assistant_pb2.ScreenOutConfig.PLAYING
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
+eye_color_default     = 0x00002f # blue, normal robot color
+eye_color_name_heard  = 0x002f2f # aqua (slight green tint)
 
 
-# globals
+
+# GLOBALS
+use_google_assistant_voice = False # use system voice or Google Assistant voice
 interrupted = False
 snowboy_mic_pause = False
 
-eye_color_default     = 0x00002f # blue, normal robot color
-eye_color_name_heard  = 0x002f2f # aqua (slight green tint)
 
 
 def signal_handler(signal, frame):
     global interrupted
     interrupted = True
-
 
 def interrupt_callback():
     global interrupted
@@ -92,6 +105,7 @@ def mic_pause_callback():
     global snowboy_mic_pause
     #print("got interrupt_callback")
     return snowboy_mic_pause
+
 
 
 #=====================================================================================
@@ -164,13 +178,14 @@ class SampleAssistant(object):
            retry=retry_if_exception(is_grpc_error_unavailable))
     def assist(self):
         """Send a voice request to the Assistant and playback the response.
-
         Returns: True if conversation should continue.
         """
         continue_conversation = False
         assistant_response = ""
         device_actions_futures = []
-
+        text_response = None
+        html_response = None
+        debug_log_text_response = False
 
         self.conversation_stream.start_recording()
         rospy.loginfo('Recording audio request.')
@@ -185,7 +200,28 @@ class SampleAssistant(object):
         # received from the gRPC Google Assistant API.
         for resp in self.assistant.Assist(iter_log_assist_requests(),
                                           self.deadline):
-            assistant_helpers.log_assist_response_without_audio(resp)
+
+            #assistant_helpers.log_assist_response_without_audio(resp)
+            if debug_log_text_response:  # logging.getLogger().isEnabledFor(logging.DEBUG):
+                resp_copy = embedded_assistant_pb2.AssistResponse()
+                resp_copy.CopyFrom(resp)
+                has_audio_data = (resp_copy.HasField('audio_out') and
+                                  len(resp_copy.audio_out.audio_data) > 0)
+                if has_audio_data:
+                    size = len(resp_copy.audio_out.audio_data)
+                    resp_copy.audio_out.ClearField('audio_data')
+                    if resp_copy.audio_out.ListFields():
+                        rospy.loginfo('AssistResponse: %s audio_data (%d bytes)',
+                                      resp_copy,
+                                      size)
+                    else:
+                        rospy.loginfo('AssistResponse: audio_data (%d bytes)',
+                                      size)
+                    return
+                else:
+                    rospy.loginfo('AssistResponse: %s', resp_copy)
+
+
             if resp.event_type == END_OF_UTTERANCE:
                 rospy.loginfo('End of audio request detected.')
                 rospy.loginfo('Stopping recording.')
@@ -194,25 +230,31 @@ class SampleAssistant(object):
                 rospy.loginfo('Transcript of user request: "%s".',
                              ' '.join(r.transcript
                                       for r in resp.speech_results))
-            if len(resp.audio_out.audio_data) > 0:
-                if not self.conversation_stream.playing:
-                    self.conversation_stream.stop_recording()
-                    self.conversation_stream.start_playback()
-                    rospy.loginfo('Playing assistant response.')
-                self.conversation_stream.write(resp.audio_out.audio_data)
+ 
+            if use_google_assistant_voice:
+                if len(resp.audio_out.audio_data) > 0:
+                    if not self.conversation_stream.playing:
+                        self.conversation_stream.stop_recording()
+                        self.conversation_stream.start_playback()
+                        rospy.loginfo('Playing assistant response.')
+                    self.conversation_stream.write(resp.audio_out.audio_data)
+
             if resp.dialog_state_out.conversation_state:
                 conversation_state = resp.dialog_state_out.conversation_state
                 rospy.loginfo('Updating conversation state.')
                 self.conversation_state = conversation_state
+
             if resp.dialog_state_out.volume_percentage != 0:
                 volume_percentage = resp.dialog_state_out.volume_percentage
                 rospy.loginfo('Setting volume to %s%%', volume_percentage)
                 self.conversation_stream.volume_percentage = volume_percentage
+
             if resp.dialog_state_out.microphone_mode == DIALOG_FOLLOW_ON:
                 continue_conversation = True
                 rospy.loginfo('Expecting follow-on query from user.')
             elif resp.dialog_state_out.microphone_mode == CLOSE_MICROPHONE:
                 continue_conversation = False
+
             if resp.device_action.device_request_json:
                 device_request = json.loads(
                     resp.device_action.device_request_json
@@ -226,7 +268,15 @@ class SampleAssistant(object):
                 system_browser.display(resp.screen_out.data)
 
             if resp.dialog_state_out.supplemental_display_text:
-                assistant_response = resp.dialog_state_out.supplemental_display_text
+                text_response = resp.dialog_state_out.supplemental_display_text
+                if text_response:
+                    try:
+                        text_response_ascii = text_response.encode('ascii',errors='ignore')
+                        rospy.loginfo('ASSISTANT RESPONSE TEXT: [%s]', text_response_ascii)
+                    except Exception as e:
+                        rospy.logwarn('Bad ASCII response from Assistant: %s', e)
+
+
 
         if len(device_actions_futures):
             rospy.loginfo('Waiting for device executions to complete.')
@@ -234,7 +284,7 @@ class SampleAssistant(object):
 
         rospy.loginfo('Finished playing assistant response.')
         self.conversation_stream.stop_playback()
-        return continue_conversation, assistant_response
+        return continue_conversation, text_response
 
     #=====================================================================================
     def gen_assist_requests(self):
@@ -280,14 +330,29 @@ class google_assistant_speech_recognition:
 
     def __init__(self):
 
-      self.logname = 'Google Assistant: '
-      rospy.init_node('google_assistant_speech_recognition', anonymous=True)
-      rospy.Subscriber("/microphone/user_enable", Bool, self.mic_user_enable_cb)
-      rospy.Subscriber("/microphone/system_enable", Bool, self.mic_system_enable_cb)
-      self.pub_eye_color = rospy.Publisher('/head/eye_color', UInt32, queue_size=1)        
-      self.mic_user_enabled = True
-      self.mic_system_enabled = True
-      self.mic_user_enable_pending = False
+        self.logname = 'Google Assistant: '
+        rospy.init_node('google_assistant_speech_recognition', anonymous=True)
+        rospy.Subscriber("/microphone/user_enable", Bool, self.mic_user_enable_cb)
+        rospy.Subscriber("/microphone/system_enable", Bool, self.mic_system_enable_cb)
+
+
+        # Publish an action for the behavior engine to handle
+        self.behavior_cmd_pub = rospy.Publisher('behavior/cmd', CommandState, queue_size=2)
+
+        # Publish eye color changes, based upon mic state - TODO
+        self.pub_eye_color = rospy.Publisher('/head/eye_color', UInt32, queue_size=2)        
+
+        # Publish robot light control, based upon light state - TODO
+        self.pub_light_mode = rospy.Publisher('/arm_led_mode', UInt16, queue_size=2)        
+
+
+        self.mic_user_enabled = True
+        self.mic_system_enabled = True
+        self.mic_user_enable_pending = False
+
+
+        # use_google_assistant_voice
+        self.TTS_client = None # Text To Speech
 
 
     def mic_user_enable_cb(self, data):
@@ -359,7 +424,7 @@ class google_assistant_speech_recognition:
         audio_device = None
         read_from_file = True # first read is file from Snowboy
  
-        display_assistant_responses = True # Display HTML!
+        display_assistant_responses = False # Display HTML!
         grpc_deadline = DEFAULT_GRPC_DEADLINE
 
         rospy.loginfo('initializing SampleAssistant...')
@@ -422,17 +487,21 @@ class google_assistant_speech_recognition:
 
 
                 rospy.loginfo('Calling Assist...')
-                assistant_response = ""
+                assistant_response = None
+                assistant_response_ascii = None
                 continue_conversation, assistant_response = assistant.assist()
-                #continue_conversation = False # TODO !!!!
 
                 rospy.loginfo('Done with conversation / response.')
+                if assistant_response:
+                    try:
+                        assistant_response_ascii = assistant_response.encode('ascii',errors='ignore')
+                        rospy.loginfo('FINAL ASSISTANT RESPONSE TEXT: [%s]', assistant_response_ascii)
 
+                        if not use_google_assistant_voice:
+                            self.local_voice_say_text(assistant_response_ascii)
 
-                try:
-                    rospy.loginfo('ASSISTANT RESPONSE TEXT: [%s]', assistant_response)
-                except Exception as e:
-                    rospy.logwarn('Bad ASCII response from Assistant: %s', e)
+                    except Exception as e:
+                        rospy.logwarn('Bad FINAL ASCII response from Assistant: %s', e)
 
 
                 # TODO - COPY ALL THIS FROM GOOGLE_CLOUD 
@@ -486,6 +555,22 @@ class google_assistant_speech_recognition:
             return True
         except urllib2.URLError as err: 
             return False
+
+    def local_voice_say_text(self, text_to_speak):
+        if self.TTS_client != None:
+            goal = audio_and_speech_common.msg.speechGoal(text_to_speak)
+            self.TTS_client.send_goal(goal)
+        else:
+            rospy.logwarn( "Text To Speech server is not available")
+
+
+    def send_behavior_command(self, command, param1, param2):
+        msg = CommandState()
+        msg.commandState = ''
+        msg.param1 = param1
+        msg.param1 = param1
+        self.behavior_cmd_pub.publish(msg)
+
 
     #=====================================================================================
     def run(self):
@@ -592,17 +677,22 @@ class google_assistant_speech_recognition:
         def spin(turn_direction):
             rospy.loginfo('******> Got Spin Command [%s] ****************************', turn_direction)
 
+
+
         @self.device_handler.command('com.shinselrobots.commands.stop')
         def stop(param1):
             rospy.loginfo('******> Got stop Command ****************************')
+            self.send_behavior_command('STOP', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.sleep')
         def sleep(param1):
             rospy.loginfo('******> Got sleep Command ****************************')
+            self.send_behavior_command('SLEEP', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.wake')
         def wake(param1):
             rospy.loginfo('******> Got wake Command ****************************')
+            self.send_behavior_command('WAKEUP', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.hands_up')
         def hands_up(param1):
@@ -648,8 +738,22 @@ class google_assistant_speech_recognition:
         def head_center(param1):
             rospy.loginfo('******> Got head_center Command ****************************')
 
- 
+
+  
         rospy.loginfo('Google Assistant *** Initialization complete ***')
+
+        self.TTS_client = None
+        if not use_google_assistant_voice:
+            # check for service as late as possible to give service time to start up
+            rospy.loginfo(self.logname + "Initializing LOCAL Text to Speech...")
+            client = actionlib.SimpleActionClient("/speech_service",
+                audio_and_speech_common.msg.speechAction)
+            if( False == client.wait_for_server(rospy.Duration(10, 0))):
+                rospy.logerr(self.logname + "WARNING!!! Text to Speech server is not available, skipping")
+            else:
+                self.TTS_client = client
+
+            rospy.loginfo(self.logname + "LOCAL Text to speech server ready")
 
 
         #=====================================================================================
@@ -659,14 +763,6 @@ class google_assistant_speech_recognition:
         detector = snowboydecoder.HotwordDetector(
             keyphrase_models, sensitivity=hotword_sensitivity, apply_frontend=True)
 
-        # do this as late as possible to give service time to start up
-        rospy.loginfo(self.logname + "Waiting for service:  speech_handler")
-        try:
-            rospy.wait_for_service('speech_handler', 10) # wait seconds
-
-        except:
-            rospy.logwarn(self.logname + "speech_handler service not ready.  Exiting..")
-            return
 
         rospy.loginfo(self.logname + "Listening for keyphrase...")
         # main loop - This funciton will block until ros shutdown

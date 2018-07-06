@@ -5,7 +5,7 @@
     <param name="key_phrase_dir" type="string" value="$(find google_assistant_speech)/scripts/resources" />
     <param name="key_phrase_1" type="string" value="sheldon.pmdl" />   <!-- Personal model -->
     <param name="key_phrase_2" type="string" value="microphone_on.pmdl" />     <!-- Personal model -->
-    <param name="hotword_sensitivity" type="double" value="0.50" />    <!-- Larger = more sensitive -->
+    <param name="hotword_sensitivity" type="double" value="0.40" />    <!-- 0.5 Larger = more sensitive -->
     <param name="apply_frontend" type="bool" value="True" />           <!-- Keyword front end noise processing? -->
 
     <!-- Example of Universal model (for anyone's voice):    
