@@ -6,8 +6,7 @@
 # Listens to the microphone for a Keyword, then sends text to google assistant for decoding
 # based upon Snowboy Python "demo4", which shows how to use the new_message_callback
 #
-# Information on installing the speech recognition library can be found at:
-# https://pypi.python.org/pypi/SpeechRecognition/
+# Note that Snowboy adjusts to room volume, so in a very quiet room, my interperet any noise as its keyword!  I need to investigate this further...
 
 # Publishes messages:
 #   speech_recognition/text
@@ -54,6 +53,7 @@ import pathlib2 as pathlib
 import sys
 import time
 import uuid
+import re
 
 import click
 import grpc
@@ -345,6 +345,8 @@ class google_assistant_speech_recognition:
         # Publish robot light control, based upon light state - TODO
         self.pub_light_mode = rospy.Publisher('/arm_led_mode', UInt16, queue_size=2)        
 
+        # Publish microphone enable/disable by user (Note: user_enable vs system_enable)
+        self.mic_user_enable_pub = rospy.Publisher('microphone/user_enable', Bool, queue_size=1)
 
         self.mic_user_enabled = True
         self.mic_system_enabled = True
@@ -418,7 +420,6 @@ class google_assistant_speech_recognition:
 
         #=====================================================================================
         # Normal operation - first handle the audio from the file Snowboy recorded
-        self.pub_eye_color.publish(eye_color_default) # restore eye color to normal
         rospy.loginfo(self.logname + "handling audio from Snowboy...")
 
         audio_device = None
@@ -494,6 +495,7 @@ class google_assistant_speech_recognition:
                 rospy.loginfo('Done with conversation / response.')
                 if assistant_response:
                     try:
+                        # Handle Unicode
                         assistant_response_ascii = assistant_response.encode('ascii',errors='ignore')
                         rospy.loginfo('FINAL ASSISTANT RESPONSE TEXT: [%s]', assistant_response_ascii)
 
@@ -504,20 +506,8 @@ class google_assistant_speech_recognition:
                         rospy.logwarn('Bad FINAL ASCII response from Assistant: %s', e)
 
 
-                # TODO - COPY ALL THIS FROM GOOGLE_CLOUD 
-                #phrase_heard = r.recognize_google(audio)
-                #rospy.loginfo(self.logname + "phrase_heard:  [" + phrase_heard + "]")
-
-                #phrase_heard_uppercase = phrase_heard.upper()
-                
-                #rospy.logdebug("DBG: calling speech_handler service")
-                # ... ETC...
-
-
-
-
-
-            # END OF BLOCK FROM GOOGLE_CLOUD
+        # END OF BLOCK FROM GOOGLE_CLOUD
+        self.pub_eye_color.publish(eye_color_default) # restore eye color to normal
         os.remove(snowboy_audio_file)
 
 
@@ -558,17 +548,26 @@ class google_assistant_speech_recognition:
 
     def local_voice_say_text(self, text_to_speak):
         if self.TTS_client != None:
-            goal = audio_and_speech_common.msg.speechGoal(text_to_speak)
+            # Trap any quotes within the string (they mess up the call to swift)
+            PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:-_. \n"
+            clean_text = "".join(c for c in text_to_speak if c in PERMITTED_CHARS)
+            #clean_text = re.sub('[^0-9a-zA-Z _-\n]+', '', text_to_speak)
+            clean_text = clean_text.replace('\n', '. ') # replace line breaks with period for slight pause
+            clean_text = clean_text.replace('OR', ' ') # remove "OR" (Oregon)
+            final_text = clean_text.split("---")[0]     # Remove extraneous info that is returned
+ 
+            rospy.loginfo('ASSIST CLEAN : [%s]' % (final_text))
+
+            goal = audio_and_speech_common.msg.speechGoal(final_text)
             self.TTS_client.send_goal(goal)
         else:
             rospy.logwarn( "Text To Speech server is not available")
 
-
     def send_behavior_command(self, command, param1, param2):
         msg = CommandState()
-        msg.commandState = ''
+        msg.commandState = command
         msg.param1 = param1
-        msg.param1 = param1
+        msg.param2 = param2
         self.behavior_cmd_pub.publish(msg)
 
 
@@ -585,7 +584,7 @@ class google_assistant_speech_recognition:
         keyphrase_2_path = keyphrase_dir + '/' + keyphrase_2
 
         # Hotword Sensitivity:  larger value is more sensitive (good for quiet room)
-        hotword_sensitivity = rospy.get_param('hotword_sensitivity', 0.80)  # 0.38?
+        hotword_sensitivity = 0.50 # rospy.get_param('hotword_sensitivity', 0.80)  # 0.38?
         apply_frontend = rospy.get_param('apply_frontend', True)  # Frontend filtering
 
         proxyUrl = rospy.get_param('proxyUrl', "") # default to no proxy
@@ -658,12 +657,33 @@ class google_assistant_speech_recognition:
             rospy.logfatal('Device config not found: %s' % e)
             sys.exit(-1)
 
+
+        # DEVICE HANDLERS.  See resources/actions .json to add more actions
+
         rospy.loginfo('Setting up Google Assistant device handlers...')
         self.device_handler = device_helpers.DeviceRequestHandler(self.device_id)
 
         @self.device_handler.command('com.shinselrobots.commands.turn')
         def turn(turn_direction, amount):
             rospy.loginfo('******> Got Turn Command [%s]  [%s] ****************************', turn_direction, amount)
+            turn_speed = '2.0'
+            turn_command = '45' # Normal Turn
+            if amount == 'SMALL':
+                turn_command = '30' # Small Turn
+            elif amount == 'LARGE':
+                turn_command = '90' # Large Turn
+
+            if turn_direction == 'RIGHT':
+                turn_command = '-' + turn_command                # Negative Turn
+                self.send_behavior_command('TURN', turn_command, turn_speed)
+                rospy.loginfo('Sending Turn Right command: [%s]', turn_command)
+            elif turn_direction == 'LEFT':
+                self.send_behavior_command('TURN', turn_command, turn_speed)
+                rospy.loginfo('Sending Turn Left command: [%s]', turn_command)
+            else:
+                rospy.logwarn('UNKNOWN TURN DIRECTION!  COMMAND IGNORED!')
+
+
 
         @self.device_handler.command('com.shinselrobots.commands.move')
         def move(move_direction, amount):
@@ -676,7 +696,17 @@ class google_assistant_speech_recognition:
         @self.device_handler.command('com.shinselrobots.commands.spin')
         def spin(turn_direction):
             rospy.loginfo('******> Got Spin Command [%s] ****************************', turn_direction)
-
+            turn_speed = '2.0'
+            turn_command = '180' # Spin Turn
+            if turn_direction == 'RIGHT':
+                turn_command = '-' + turn_command                # Negative Turn
+                self.send_behavior_command('TURN', turn_command, turn_speed)
+                rospy.loginfo('Sending Turn Right command: [%s]', turn_command)
+            elif turn_direction == 'LEFT':
+                self.send_behavior_command('TURN', turn_command, turn_speed)
+                rospy.loginfo('Sending Turn Left command: [%s]', turn_command)
+            else:
+                rospy.logwarn('UNKNOWN TURN DIRECTION!  COMMAND IGNORED!')
 
 
         @self.device_handler.command('com.shinselrobots.commands.stop')
@@ -697,46 +727,58 @@ class google_assistant_speech_recognition:
         @self.device_handler.command('com.shinselrobots.commands.hands_up')
         def hands_up(param1):
             rospy.loginfo('******> Got hands_up Command ****************************')
+            self.send_behavior_command('HANDS_UP', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.arms_home')
         def arms_home(param1):
             rospy.loginfo('******> Got arms_home Command ****************************')
+            self.send_behavior_command('ARMS_HOME', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.follow')
         def follow(param1):
             rospy.loginfo('******> Got follow Command ****************************')
+            self.send_behavior_command('FOLLOW_ME', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.microphone_off')
         def microphone_off(param1):
             rospy.loginfo('******> Got microphone_off Command ****************************')
+            self.mic_user_enable_pub.publish(False)
 
         @self.device_handler.command('com.shinselrobots.commands.microphone_on')
         def microphone_on(param1):
             rospy.loginfo('******> Got microphone_on Command ****************************')
+            # no action needed, but send just in case...
+            self.mic_user_enable_pub.publish(True)
 
         @self.device_handler.command('com.shinselrobots.commands.toggle_lights')
         def toggle_lights(param1):
             rospy.loginfo('******> Got toggle_lights Command ****************************')
+            #TODO self.send_behavior_command('TOGGLE_LIGHTS', 'ARM_ONLY','')
 
         @self.device_handler.command('com.shinselrobots.commands.sing_believer')
         def sing_believer(param1):
             rospy.loginfo('******> Got sing_believer Command ****************************')
+            self.send_behavior_command('RUN_SCRIPT', 'believer','')
 
         @self.device_handler.command('com.shinselrobots.commands.bow')
         def bow(param1):
             rospy.loginfo('******> Got bow Command ****************************')
+            self.send_behavior_command('BOW', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.who_is_president')
         def who_is_president(param1):
             rospy.loginfo('******> Got who_is_president Command ****************************')
+            # No action needed
 
         @self.device_handler.command('com.shinselrobots.commands.wave')
         def wave(param1):
             rospy.loginfo('******> Got wave Command ****************************')
+            self.send_behavior_command('WAVE', '','')
 
         @self.device_handler.command('com.shinselrobots.commands.head_center')
         def head_center(param1):
             rospy.loginfo('******> Got head_center Command ****************************')
+            #TODO self.send_behavior_command('HEAD_CENTER', '','')
 
 
   
@@ -761,7 +803,7 @@ class google_assistant_speech_recognition:
 
         keyphrase_models = [keyphrase_1_path, keyphrase_2_path]
         detector = snowboydecoder.HotwordDetector(
-            keyphrase_models, sensitivity=hotword_sensitivity, apply_frontend=True)
+            keyphrase_models, sensitivity=hotword_sensitivity, apply_frontend=False)
 
 
         rospy.loginfo(self.logname + "Listening for keyphrase...")

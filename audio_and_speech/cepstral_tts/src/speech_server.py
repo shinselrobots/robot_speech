@@ -44,6 +44,12 @@ class speechAction(object):
         
         rospy.loginfo('%s: Saying: [%s]' % (self._action_name, goal.text_to_speak))
 
+        # Trap any quotes or other bad characters within the string (they mess up the call to swift)
+        PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:-_. \n"
+        clean_text = "".join(c for c in goal.text_to_speak if c in PERMITTED_CHARS)
+        rospy.loginfo('%s: Clean : [%s]' % (self._action_name, clean_text))
+
+
         # mute the microphone, so the robot does not talk to itself!
         self.mic_system_enable_pub.publish(False)
         
@@ -52,7 +58,7 @@ class speechAction(object):
         # Cepstral Swift is used to speak with a nice voice
         # padsp is the bridge between old OSS audio and ALSA on Linux
         # TODO - see if run_comamnd or os.system return a status, and set success appropriately
-        run_command = "padsp swift \'{}\'".format(goal.text_to_speak) 
+        run_command = "padsp swift \'{}\'".format(clean_text) 
         os.system(run_command)
 
         # note, no way to interrupt this (yet) so preemption ignored.

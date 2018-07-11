@@ -96,7 +96,7 @@
       }
     },
     {
-      "name": "com.shinselrobots.actions.spin",
+      "name": "com.shinselrobots.actions.spin_right",
       "availability": {
         "deviceClasses": [
           {
@@ -105,16 +105,11 @@
         ]
       },
       "intent": {
-        "name": "com.shinselrobots.intents.spin",
-        "parameters": [
-          {
-            "name": "turn_direction",
-            "type": "TurnDirection"
-          }
-        ],
+        "name": "com.shinselrobots.intents.spin_right",
         "trigger": {
           "queryPatterns": [
-            "spin ($TurnDirection:turn_direction)?"
+            "spin right",
+            "spinright"
           ]
         }
       },
@@ -124,14 +119,54 @@
             "items": [
               {
                 "simpleResponse": {
-                  "textToSpeech": "spinning $turn_direction"
+                  "textToSpeech": "spinning right"
                 }
               },
               {
                 "deviceExecution": {
-                  "command": "com.shinselrobots.commands.spin",
+                  "command": "com.shinselrobots.commands.spin_right",
                   "params": {
-                    "turn_direction": "$turn_direction"
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.spin_left",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.spin_left",
+        "trigger": {
+          "queryPatterns": [
+            "spin left",
+            "spinleft"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "spinning left"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.spin_left",
+                  "params": {
+                    "param1": ""
                   }
                 }
               }
@@ -640,7 +675,8 @@
         "name": "com.shinselrobots.intents.who_is_president",
         "trigger": {
           "queryPatterns": [
-            "who is the president"
+            "who is the president",
+            "who is the president of the united states"
           ]
         }
       },
@@ -745,7 +781,6 @@
         }
       }
     }
-
   ],
   "types": [
     {
@@ -798,7 +833,9 @@
         {
           "key": "LARGE",
           "synonyms": [
-            "hard"
+            "a lot",
+            "hard",
+            "large"
           ]
         }
       ]

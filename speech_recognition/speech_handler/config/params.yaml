@@ -38,7 +38,7 @@ commands:
 - description: 'bow command'
   required_word_lists:
   - 'take a bow'
-  intent: BOW_GREETING
+  intent: BOW
 
 - description: 'Introduce yourself command'
   required_word_lists:

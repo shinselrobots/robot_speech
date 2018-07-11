@@ -88,7 +88,7 @@ This module provides speech recognition and information lookup for the robot.
 
   * Note: If _snowboydetect.so is not in ROS google_cloud_speech scripts directory, or
   * you want a newer version, do this:
-  * cp ~/dev/snowboy/swig/Python/_snowboydetect.so ~/catkin_robot/src/robot_speech/speech_recognition/google_cloud_speech/scripts
+  * cp ~/dev/snowboy/swig/Python/_snowboydetect.so ~/catkin_robot/src/robot_speech/speech_recognition/google_assistant_speech/scripts
 
 
 ## Try full speech recognition in ROS
