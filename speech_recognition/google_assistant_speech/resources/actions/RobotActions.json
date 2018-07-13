@@ -784,6 +784,254 @@
           }
         }
       }
+    },
+    {
+      "name": "com.shinselrobots.actions.tell_age",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.tell_age",
+        "trigger": {
+          "queryPatterns": [
+            "how old are you",
+            "what is your age"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.tell_age",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.tell_function",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.tell_function",
+        "trigger": {
+          "queryPatterns": [
+            "what can you do",
+            "what do you do",
+            "what is your function"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.tell_function",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.tell_size",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.tell_size",
+        "trigger": {
+          "queryPatterns": [
+            "how tall are you",
+            "how much do you weigh",
+            "what is your weight",
+            "how big are you"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.tell_size",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.tell_sex",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.tell_sex",
+        "trigger": {
+          "queryPatterns": [
+            "are you a boy (or girl)?",
+            "are you a male (or female)"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.tell_sex",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.tell_time",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.tell_time",
+        "trigger": {
+          "queryPatterns": [
+            "what time is it"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "lets see"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.tell_time",
+                  "params": {
+                    "param1": ""
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "com.shinselrobots.actions.joke",
+      "availability": {
+        "deviceClasses": [
+          {
+            "assistantSdkDevice": {}
+          }
+        ]
+      },
+      "intent": {
+        "name": "com.shinselrobots.intents.joke",
+        "parameters": [
+          {
+            "name": "joke_type",
+            "type": "JokeType"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "tell us (a)? ($JokeType:joke_type)? joke",
+            "tell us (some)? ($JokeType:joke_type) jokes"
+          ]
+        }
+      },
+      "fulfillment": {
+        "staticFulfillment": {
+          "templatedResponse": {
+            "items": [
+              {
+                "simpleResponse": {
+                  "textToSpeech": "ok"
+                }
+              },
+              {
+                "deviceExecution": {
+                  "command": "com.shinselrobots.commands.joke",
+                  "params": {
+                    "param1": "$joke_type"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
     }
   ],
   "types": [
@@ -840,6 +1088,54 @@
             "a lot",
             "hard",
             "large"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "$Sex",
+      "entities": [
+        {
+          "key": "MALE",
+          "synonyms": [
+            "male",
+            "boy",
+            "man"
+          ]
+        },
+        {
+          "key": "FEMALE",
+          "synonyms": [
+            "female",
+            "girl",
+            "woman"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "$JokeType",
+      "entities": [
+        {
+          "key": "BEST_JOKES",
+          "synonyms": [
+            "good",
+            "funny",
+            "best"
+          ]
+        },
+        {
+          "key": "STAR_WARS_JOKES",
+          "synonyms": [
+            "starwars",
+            "star wars"
+          ]
+        },
+        {
+          "key": "OTHER_JOKES",
+          "synonyms": [
+            "more",
+            "other"
           ]
         }
       ]

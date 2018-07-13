@@ -550,6 +550,7 @@ class google_assistant_speech_recognition:
             final_text = clean_text.split("http")[0]     # Remove extraneous info that is returned
  
             rospy.loginfo('ASSIST CLEAN : [%s]' % (final_text))
+            self.pub_eye_color.publish(eye_color_default) # set eye color to normal (don't wait until text is done)
 
             goal = audio_and_speech_common.msg.speechGoal(final_text)
             self.TTS_client.send_goal(goal)
@@ -566,13 +567,13 @@ class google_assistant_speech_recognition:
 
     def handle_behavior_command(self, command, param1, param2, text_to_say):
         rospy.loginfo('**********************************************')
-        rospy.loginfo('    Google Assistant Command: %s param1: [%s] param2: [%s] say: [%s]', 
+        rospy.loginfo('    Google Assistant Command: [%s] param1: [%s] param2: [%s] say: [%s]', 
             command, param1, param2, text_to_say)
         rospy.loginfo('**********************************************')
+        self.send_behavior_command(command, param1, param2)
         if not use_google_assistant_voice: 
             # assistant not acknowledging the command, so we do it
             self.local_voice_say_text(text_to_say)
-        self.send_behavior_command(command, param1, param2)
 
 
     #=====================================================================================
@@ -673,7 +674,24 @@ class google_assistant_speech_recognition:
             if amount == '$amount':
                 amount = ''
             rospy.loginfo('******> Got Move Command [%s]  [%s] ', move_direction, amount)
-            self.handle_behavior_command('MOVE', move_direction, '', ('ok, moving ' + move_direction))
+            move_speed = '0.5'
+            move_command = '0.75' # Normal Move (meters)
+            if move_direction == 'BACKWARD':
+                move_command = '-0.5' # Normal Backward Move (meters)
+                if amount == 'SMALL':
+                    move_command = '-0.25' # Small Move
+                elif amount == 'LARGE':
+                    move_command = '-0.75' # Large Move
+            else:
+                move_command = '0.75' # Normal Forward Move (meters)
+                if amount == 'SMALL':
+                    move_command = '0.25' # Small Move
+                elif amount == 'LARGE':
+                    move_command = '1.0' # Large Move
+
+            self.handle_behavior_command('MOVE', move_command, move_speed, ('ok, moving ' + move_direction))
+
+
 
         @self.device_handler.command('com.shinselrobots.commands.turn')
         def turn(turn_direction, amount):
@@ -693,12 +711,12 @@ class google_assistant_speech_recognition:
         @self.device_handler.command('com.shinselrobots.commands.spin_left')
         def spin_left(param1):
             turn_speed = '2.0'
-            self.handle_behavior_command('TURN', 180, turn_speed, 'spinning left')
+            self.handle_behavior_command('TURN', '180', turn_speed, 'spinning left')
 
         @self.device_handler.command('com.shinselrobots.commands.spin_right')
         def spin_right(param1):
             turn_speed = '2.0'
-            self.handle_behavior_command('TURN', -180, turn_speed, 'spinning right')
+            self.handle_behavior_command('TURN', '-180', turn_speed, 'spinning right')
 
         @self.device_handler.command('com.shinselrobots.commands.stop')
         def stop(param1):
@@ -792,6 +810,60 @@ class google_assistant_speech_recognition:
         @self.device_handler.command('com.shinselrobots.commands.head_center')
         def head_center(param1):
             self.handle_behavior_command('HEAD_CENTER', '','', 'ok')
+
+        @self.device_handler.command('com.shinselrobots.commands.tell_time')
+        def tell_time(param1):
+            self.handle_behavior_command('TELL_TIME', '','', 'let me check')
+
+        @self.device_handler.command('com.shinselrobots.commands.joke')
+        def joke(param1):
+            self.handle_behavior_command('TELL_JOKE', param1,'', 'ok')
+
+
+        @self.device_handler.command('com.shinselrobots.commands.tell_age')
+        def tell_age(param1):
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: TELL AGE')
+            rospy.loginfo('    Param1 = %s', param1)
+            rospy.loginfo('**********************************************')
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text("I have been under construction for about a year.  My hardware is nearly complete, but my software is constantly evolving")
+
+
+        @self.device_handler.command('com.shinselrobots.commands.tell_function')
+        def tell_function(param1):
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: TELL FUNCTION')
+            rospy.loginfo('    Param1 = %s', param1)
+            rospy.loginfo('**********************************************')
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text("i am currently focused on human interaction.  but I hope to gain object manipulation capabilities soon")
+                time.sleep(6)
+                self.local_voice_say_text("because the ultimate goal of any robot is to fetch beer")
+
+        @self.device_handler.command('com.shinselrobots.commands.tell_size')
+        def tell_size(param1):
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: TELL SIZE')
+            rospy.loginfo('    Param1 = %s', param1)
+            rospy.loginfo('**********************************************')
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text("I am 4 foot 3 inches tall, and I weigh about 75 pounds")
+
+        @self.device_handler.command('com.shinselrobots.commands.tell_sex')
+        def tell_sex(param1):
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: TELL SEX')
+            rospy.loginfo('    Param1 = %s', param1)
+            rospy.loginfo('**********************************************')
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text("i am a boy robot")
+
+
 
   
         rospy.loginfo('Google Assistant *** Initialization complete ***')
