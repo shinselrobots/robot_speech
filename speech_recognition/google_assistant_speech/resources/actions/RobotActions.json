@@ -109,7 +109,9 @@
         "trigger": {
           "queryPatterns": [
             "spin right",
-            "spinright"
+            "spin rite",
+            "spinright",
+            "spinrite"
           ]
         }
       },
@@ -438,7 +440,9 @@
         "trigger": {
           "queryPatterns": [
             "microphone off",
-            "dont listen"
+            "disable microphone",
+            "dont listen",
+            "stop listening"
           ]
         }
       },

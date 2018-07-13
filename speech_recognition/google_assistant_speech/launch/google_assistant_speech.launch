@@ -6,15 +6,15 @@
     <param name="key_phrase_1" type="string" value="sheldon.pmdl" />   <!-- Personal model -->
     <param name="key_phrase_2" type="string" value="microphone_on.pmdl" />     <!-- Personal model -->
     <param name="hotword_sensitivity" type="double" value="0.40" />    <!-- 0.5 Larger = more sensitive -->
-    <param name="apply_frontend" type="bool" value="True" />           <!-- Keyword front end noise processing? -->
+    <param name="apply_frontend" type="bool" value="False" />           <!-- Keyword front end noise processing? -->
 
     <!-- Example of Universal model (for anyone's voice):    
     <param name="key_phrase_2" type="string" value="snowboy.umdl" />
     -->
 
-    <!-- if using proxy, configure below and set https_proxy in your .bashrc --> 
-    <param name="proxyUrl" type="string" value="" /> 
-    <!--  <param name="proxyUrl" type="string" value="$(env https_proxy)" /> -->
+    <!-- if using proxy, configure one of the below and set https_proxy in your .bashrc --> 
+    <!-- <param name="proxyUrl" type="string" value="" />  -->
+    <!-- <param name="proxyUrl" type="string" value="$(env https_proxy)" /> -->
  
   </launch>
  

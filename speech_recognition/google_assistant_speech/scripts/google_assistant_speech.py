@@ -362,10 +362,10 @@ class google_assistant_speech_recognition:
         self.mic_user_enabled = data.data
         if self.mic_user_enabled:
             rospy.loginfo(self.logname + "========================================")
-            rospy.loginfo(self.logname + "        SNOWBOY: MIC ENABLED")
+            rospy.loginfo(self.logname + "        SNOWBOY: USER MIC ENABLED")
         else:
             rospy.loginfo(self.logname + "========================================")
-            rospy.loginfo(self.logname + "        SNOWBOY: MIC DISABLED")
+            rospy.loginfo(self.logname + "        SNOWBOY: USER MIC DISABLED")
 
 
     def mic_system_enable_cb(self, data):
@@ -373,15 +373,16 @@ class google_assistant_speech_recognition:
         self.mic_system_enabled = data.data
         if self.mic_system_enabled:
             rospy.loginfo(self.logname + "========================================")
-            rospy.loginfo(self.logname + "        SNOWBOY: MIC ENABLED")
+            rospy.loginfo(self.logname + "        SNOWBOY: SYSTEM MIC ENABLED")
         else:
             rospy.loginfo(self.logname + "========================================")
-            rospy.loginfo(self.logname + "        SNOWBOY: MIC DISABLED")
+            rospy.loginfo(self.logname + "        SNOWBOY: SYSTEM MIC DISABLED")
 
 
     #=====================================================================================
     def audioRecorderCallback(self, snowboy_audio_file):
         # Got keyword from Snowboy, now handle the audio from the file Snowboy recorded
+        rospy.loginfo("SPEECH: Snowboy got keyword, Handling Audio that was recorded...")
         suggested_response = ""
         service_response = 0
         partial_result = False # just always send final text
@@ -390,6 +391,7 @@ class google_assistant_speech_recognition:
         
         # Handle case where mic disabled by system (talking, or moving servos)
         if not self.mic_system_enabled:
+            rospy.loginfo("SPEECH: MIC disabled by SYSTEM.  Ignoring input")
             return 
 
         # Handle case where mic disabled by user (including case where turning mic back on)
@@ -397,25 +399,13 @@ class google_assistant_speech_recognition:
             # mic disabled by User (don't listen)
             if self.mic_user_enable_pending:
                 # User said to turn mic back on!
+                rospy.loginfo("SPEECH: MIC now enabled by USER.")
                 self.mic_user_enable_pending = False  # reset flag
                 self.mic_user_enabled = True # enable mic now (ignoring whatever was in the buffer)
+                self.local_voice_say_text("Ok, I am listening")
+            else:
+                rospy.loginfo("SPEECH: MIC disabled by USER.  Ignoring input")
 
-                rospy.logdebug("DBG: calling speech_handler service")
-                try:
-                    handle_speech = rospy.ServiceProxy('speech_handler', speech_recognition_intent)
-                    service_response = handle_speech(
-                        "MICROPHONE ENABLED BY USER", suggested_response, partial_result)
-
-                    if service_response.result:
-                        rospy.loginfo(self.logname + "Phrase match found!   [" 
-                            + phrase_heard_uppercase + "]")
-
-                    else:
-                        rospy.logdebug('From intent service: no phrase match')
-
-                except rospy.ServiceException, e:
-                    rospy.logerr("Service call failed: %s"%e)
- 
             return 
 
         #=====================================================================================
@@ -547,6 +537,8 @@ class google_assistant_speech_recognition:
             return False
 
     def local_voice_say_text(self, text_to_speak):
+        if not text_to_speak:
+            return
         if self.TTS_client != None:
             # Trap any quotes within the string (they mess up the call to swift)
             PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:-_. \n"
@@ -554,7 +546,8 @@ class google_assistant_speech_recognition:
             #clean_text = re.sub('[^0-9a-zA-Z _-\n]+', '', text_to_speak)
             clean_text = clean_text.replace('\n', '. ') # replace line breaks with period for slight pause
             clean_text = clean_text.replace('OR', ' ') # remove "OR" (Oregon)
-            final_text = clean_text.split("---")[0]     # Remove extraneous info that is returned
+            clean_text = clean_text.split("---")[0]     # Remove extraneous info that is returned
+            final_text = clean_text.split("http")[0]     # Remove extraneous info that is returned
  
             rospy.loginfo('ASSIST CLEAN : [%s]' % (final_text))
 
@@ -569,6 +562,17 @@ class google_assistant_speech_recognition:
         msg.param1 = param1
         msg.param2 = param2
         self.behavior_cmd_pub.publish(msg)
+
+
+    def handle_behavior_command(self, command, param1, param2, text_to_say):
+        rospy.loginfo('**********************************************')
+        rospy.loginfo('    Google Assistant Command: %s param1: [%s] param2: [%s] say: [%s]', 
+            command, param1, param2, text_to_say)
+        rospy.loginfo('**********************************************')
+        if not use_google_assistant_voice: 
+            # assistant not acknowledging the command, so we do it
+            self.local_voice_say_text(text_to_say)
+        self.send_behavior_command(command, param1, param2)
 
 
     #=====================================================================================
@@ -658,128 +662,136 @@ class google_assistant_speech_recognition:
             sys.exit(-1)
 
 
+        #===================================================================
         # DEVICE HANDLERS.  See resources/actions .json to add more actions
 
         rospy.loginfo('Setting up Google Assistant device handlers...')
         self.device_handler = device_helpers.DeviceRequestHandler(self.device_id)
 
+        @self.device_handler.command('com.shinselrobots.commands.move')
+        def move(move_direction, amount):
+            if amount == '$amount':
+                amount = ''
+            rospy.loginfo('******> Got Move Command [%s]  [%s] ', move_direction, amount)
+            self.handle_behavior_command('MOVE', move_direction, '', ('ok, moving ' + move_direction))
+
         @self.device_handler.command('com.shinselrobots.commands.turn')
         def turn(turn_direction, amount):
-            rospy.loginfo('******> Got Turn Command [%s]  [%s] ****************************', turn_direction, amount)
+            if amount == '$amount':
+                amount = ''
+            rospy.loginfo('******> Got Turn Command [%s]  [%s] ', turn_direction, amount)
             turn_speed = '2.0'
             turn_command = '45' # Normal Turn
             if amount == 'SMALL':
                 turn_command = '30' # Small Turn
             elif amount == 'LARGE':
                 turn_command = '90' # Large Turn
-
             if turn_direction == 'RIGHT':
-                turn_command = '-' + turn_command                # Negative Turn
-                self.send_behavior_command('TURN', turn_command, turn_speed)
-                rospy.loginfo('Sending Turn Right command: [%s]', turn_command)
-            elif turn_direction == 'LEFT':
-                self.send_behavior_command('TURN', turn_command, turn_speed)
-                rospy.loginfo('Sending Turn Left command: [%s]', turn_command)
-            else:
-                rospy.logwarn('UNKNOWN TURN DIRECTION!  COMMAND IGNORED!')
+                turn_command = '-' + turn_command  # Negative Turn
+            self.handle_behavior_command('TURN', turn_command, turn_speed, ('turning ' + turn_direction))
 
-
-
-        @self.device_handler.command('com.shinselrobots.commands.move')
-        def move(move_direction, amount):
-            rospy.loginfo('******> Got Move Command [%s]  [%s] ****************************', move_direction, amount)
-
-        @self.device_handler.command('com.shinselrobots.commands.intro')
-        def intro(param1):
-            rospy.loginfo('******> Got intro Command  ****************************')
-
-        @self.device_handler.command('com.shinselrobots.commands.spin')
-        def spin(turn_direction):
-            rospy.loginfo('******> Got Spin Command [%s] ****************************', turn_direction)
+        @self.device_handler.command('com.shinselrobots.commands.spin_left')
+        def spin_left(param1):
             turn_speed = '2.0'
-            turn_command = '180' # Spin Turn
-            if turn_direction == 'RIGHT':
-                turn_command = '-' + turn_command                # Negative Turn
-                self.send_behavior_command('TURN', turn_command, turn_speed)
-                rospy.loginfo('Sending Turn Right command: [%s]', turn_command)
-            elif turn_direction == 'LEFT':
-                self.send_behavior_command('TURN', turn_command, turn_speed)
-                rospy.loginfo('Sending Turn Left command: [%s]', turn_command)
-            else:
-                rospy.logwarn('UNKNOWN TURN DIRECTION!  COMMAND IGNORED!')
+            self.handle_behavior_command('TURN', 180, turn_speed, 'spinning left')
 
+        @self.device_handler.command('com.shinselrobots.commands.spin_right')
+        def spin_right(param1):
+            turn_speed = '2.0'
+            self.handle_behavior_command('TURN', -180, turn_speed, 'spinning right')
 
         @self.device_handler.command('com.shinselrobots.commands.stop')
         def stop(param1):
-            rospy.loginfo('******> Got stop Command ****************************')
-            self.send_behavior_command('STOP', '','')
+            self.handle_behavior_command('STOP', '','', 'stopping')
 
         @self.device_handler.command('com.shinselrobots.commands.sleep')
         def sleep(param1):
-            rospy.loginfo('******> Got sleep Command ****************************')
-            self.send_behavior_command('SLEEP', '','')
+            self.handle_behavior_command('SLEEP', '','', 'ok')
 
         @self.device_handler.command('com.shinselrobots.commands.wake')
         def wake(param1):
-            rospy.loginfo('******> Got wake Command ****************************')
-            self.send_behavior_command('WAKEUP', '','')
+            self.handle_behavior_command('WAKEUP', '','', 'ok, waking up')
+
+        @self.device_handler.command('com.shinselrobots.commands.intro')
+        def intro(param1):
+            self.handle_behavior_command('INTRO', '', '', 'ok, sure')
 
         @self.device_handler.command('com.shinselrobots.commands.hands_up')
         def hands_up(param1):
-            rospy.loginfo('******> Got hands_up Command ****************************')
-            self.send_behavior_command('HANDS_UP', '','')
+            self.handle_behavior_command('HANDS_UP', '','', 'ok')
 
         @self.device_handler.command('com.shinselrobots.commands.arms_home')
         def arms_home(param1):
-            rospy.loginfo('******> Got arms_home Command ****************************')
-            self.send_behavior_command('ARMS_HOME', '','')
+            self.handle_behavior_command('ARMS_HOME', '','', 'ok')
 
         @self.device_handler.command('com.shinselrobots.commands.follow')
         def follow(param1):
-            rospy.loginfo('******> Got follow Command ****************************')
-            self.send_behavior_command('FOLLOW_ME', '','')
+            self.handle_behavior_command('FOLLOW_ME', '','', 'ok, I will follow you')
 
         @self.device_handler.command('com.shinselrobots.commands.microphone_off')
         def microphone_off(param1):
-            rospy.loginfo('******> Got microphone_off Command ****************************')
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: MICROPHONE OFF')
+            rospy.loginfo('**********************************************')
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text("Ok, I will stop listening")
             self.mic_user_enable_pub.publish(False)
 
         @self.device_handler.command('com.shinselrobots.commands.microphone_on')
         def microphone_on(param1):
-            rospy.loginfo('******> Got microphone_on Command ****************************')
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: MICROPHONE ON')
+            rospy.loginfo('**********************************************')
             # no action needed, but send just in case...
             self.mic_user_enable_pub.publish(True)
 
         @self.device_handler.command('com.shinselrobots.commands.toggle_lights')
         def toggle_lights(param1):
-            rospy.loginfo('******> Got toggle_lights Command ****************************')
-            #TODO self.send_behavior_command('TOGGLE_LIGHTS', 'ARM_ONLY','')
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: toggle lights')
+            rospy.loginfo('**********************************************')
+
+            # TODO Fix this temp Kludge, to use some global state (param server, or messaging?)
+            if not self.arm_lights_on:
+                self.pub_light_mode.publish(1) # turn lights on 
+                text_to_say = "Doesnt this look cool?"
+                self.arm_lights_on = True
+            else:
+                self.pub_light_mode.publish(0) # turn lights back off 
+                text_to_say = "entering stealth mode"
+                self.arm_lights_on = False
+
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text(text_to_say)
+
 
         @self.device_handler.command('com.shinselrobots.commands.sing_believer')
         def sing_believer(param1):
-            rospy.loginfo('******> Got sing_believer Command ****************************')
-            self.send_behavior_command('RUN_SCRIPT', 'believer','')
+            self.handle_behavior_command('RUN_SCRIPT', 'believer','', 'all right')
 
         @self.device_handler.command('com.shinselrobots.commands.bow')
         def bow(param1):
-            rospy.loginfo('******> Got bow Command ****************************')
-            self.send_behavior_command('BOW', '','')
+            self.handle_behavior_command('BOW', '','', 'ok')
 
         @self.device_handler.command('com.shinselrobots.commands.who_is_president')
         def who_is_president(param1):
-            rospy.loginfo('******> Got who_is_president Command ****************************')
-            # No action needed
+            rospy.loginfo('**********************************************')
+            rospy.loginfo('    Google Assistant Command: Who is President')
+            rospy.loginfo('**********************************************')
+            if not use_google_assistant_voice: 
+                # assistant not acknowledging the command, so we do it
+                self.local_voice_say_text("According to the internet, the president is Donald Trump. but, that might just be fake news")
+
 
         @self.device_handler.command('com.shinselrobots.commands.wave')
         def wave(param1):
-            rospy.loginfo('******> Got wave Command ****************************')
-            self.send_behavior_command('WAVE', '','')
+            self.handle_behavior_command('WAVE', '','', '')
 
         @self.device_handler.command('com.shinselrobots.commands.head_center')
         def head_center(param1):
-            rospy.loginfo('******> Got head_center Command ****************************')
-            #TODO self.send_behavior_command('HEAD_CENTER', '','')
-
+            self.handle_behavior_command('HEAD_CENTER', '','', 'ok')
 
   
         rospy.loginfo('Google Assistant *** Initialization complete ***')
@@ -816,7 +828,7 @@ class google_assistant_speech_recognition:
                        interrupt_check = interrupt_callback,
                        mic_pause = mic_pause_callback,
                        sleep_time = 0.01,
-                       silent_count_threshold = 2,
+                       silent_count_threshold = 15,
                        recording_timeout = 10) # (blocks?  10 = about 4 seconds)  
                           # Tune recording_timeout for max expected command. Default of 100 is a LONG time!
 
