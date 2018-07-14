@@ -45,7 +45,7 @@ class speechAction(object):
         rospy.loginfo('%s: Saying: [%s]' % (self._action_name, goal.text_to_speak))
 
         # Trap any quotes or other bad characters within the string (they mess up the call to swift)
-        PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:-_. \n"
+        PERMITTED_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:-_., \n"
         clean_text = "".join(c for c in goal.text_to_speak if c in PERMITTED_CHARS)
         rospy.loginfo('%s: Clean : [%s]' % (self._action_name, clean_text))
 

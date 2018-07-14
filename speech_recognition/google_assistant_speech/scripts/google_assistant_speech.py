@@ -351,7 +351,7 @@ class google_assistant_speech_recognition:
         self.mic_user_enabled = True
         self.mic_system_enabled = True
         self.mic_user_enable_pending = False
-
+        self.arm_lights_on = False
 
         # use_google_assistant_voice
         self.TTS_client = None # Text To Speech
@@ -771,18 +771,28 @@ class google_assistant_speech_recognition:
             rospy.loginfo('**********************************************')
 
             # TODO Fix this temp Kludge, to use some global state (param server, or messaging?)
-            if not self.arm_lights_on:
-                self.pub_light_mode.publish(1) # turn lights on 
-                text_to_say = "Doesnt this look cool?"
-                self.arm_lights_on = True
-            else:
-                self.pub_light_mode.publish(0) # turn lights back off 
+            text_to_say = ""
+            light_mode = 0
+            if self.arm_lights_on:
+                rospy.loginfo('SPEECH:  TURN LIGHTS OFF (Toggle)')
+                light_mode = 0
                 text_to_say = "entering stealth mode"
                 self.arm_lights_on = False
+            else:
+                rospy.loginfo('SPEECH:  TURN LIGHTS ON (Toggle)')
+                light_mode = 1
+                text_to_say = "Doesnt this look cool?"
+                self.arm_lights_on = True
 
+            rospy.loginfo('DEBUG2:   *********')
+            self.pub_light_mode.publish(light_mode)  
+
+            rospy.loginfo('DEBUG3:   *********')
             if not use_google_assistant_voice: 
                 # assistant not acknowledging the command, so we do it
                 self.local_voice_say_text(text_to_say)
+
+            rospy.loginfo('DEBUG:  DONE WITH TOGGLE LIGHTS *********')
 
 
         @self.device_handler.command('com.shinselrobots.commands.sing_believer')
@@ -839,9 +849,7 @@ class google_assistant_speech_recognition:
             rospy.loginfo('**********************************************')
             if not use_google_assistant_voice: 
                 # assistant not acknowledging the command, so we do it
-                self.local_voice_say_text("i am currently focused on human interaction.  but I hope to gain object manipulation capabilities soon")
-                time.sleep(6)
-                self.local_voice_say_text("because the ultimate goal of any robot is to fetch beer")
+                self.local_voice_say_text("i am currently focused on human interaction. but I hope to gain object manipulation capabilities soon.  because the ultimate goal of any robot is to fetch beer")
 
         @self.device_handler.command('com.shinselrobots.commands.tell_size')
         def tell_size(param1):
@@ -861,7 +869,7 @@ class google_assistant_speech_recognition:
             rospy.loginfo('**********************************************')
             if not use_google_assistant_voice: 
                 # assistant not acknowledging the command, so we do it
-                self.local_voice_say_text("i am a boy robot")
+                self.local_voice_say_text("i feel like i am a boy robot")
 
 
 
