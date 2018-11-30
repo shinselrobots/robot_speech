@@ -8,8 +8,8 @@
 - Install this package
 
 Install text to speech
+- Download Cepstral (such as "Cepstral_David_x86-64-linux_6.2.3.873") get a license from Cepstral first, then they send a link
 - uncompress tar file
--Download Cepstral (must get a license from Cepstral first, then they send a link)
 - cd Cepstral... 
 - sudo ./install.sh
 - install into /opt/swift?  yes
