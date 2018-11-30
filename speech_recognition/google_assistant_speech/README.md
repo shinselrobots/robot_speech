@@ -18,20 +18,20 @@ This module provides speech recognition and information lookup for the robot.
 
 1. Install correct version of Pyaudio
   * See if Pyaudio is already version 0.2.10 or above:
-    * apt-cache policy python-pyaudio
+    - apt-cache policy python-pyaudio
   * If old version is installed, remove it:
-    * sudo apt-get purge --auto-remove python-pyaudio
+    - sudo apt-get purge --auto-remove python-pyaudio
 
   * Install new version:
-    * sudo -H apt-get install -y libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0
-    * sudo -H apt-get install -y ffmpeg libav-tools
+    - sudo -H apt-get install -y libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0
+    - sudo -H apt-get install -y ffmpeg libav-tools
     - if needed, install pip: sudo apt install python-pip
-    * sudo -H pip install pyaudio
+    - sudo -H pip install pyaudio
 
 2. Test that mic works:
-    * Install sox:    sudo apt-get -y install sox
-    * rec test.wav
-    * play test.wav
+    - Install sox:    sudo apt-get -y install sox
+    - rec test.wav
+    - play test.wav
   * (if no audio recorded, check mic input for energy on Ubuntu control center)
 
 3. Install monotonic for python 2: (not sure if requred for google assistant)
