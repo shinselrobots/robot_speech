@@ -23,8 +23,8 @@ This module provides speech recognition and information lookup for the robot.
     * sudo apt-get purge --auto-remove python-pyaudio
 
   * Install new version:
-    * sudo -H apt-get install libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0
-    * sudo -H apt-get install ffmpeg libav-tools
+    * sudo -H apt-get install -y libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0
+    * sudo -H apt-get install -y ffmpeg libav-tools
     - if needed, install pip: sudo apt install python-pip
     * sudo -H pip install pyaudio
 
@@ -43,7 +43,7 @@ This module provides speech recognition and information lookup for the robot.
 
 ## Install Google Assistant:
 
-1.  sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+1.  sudo apt-get install -y portaudio19-dev libffi-dev libssl-dev
 2.  sudo -H python -m pip install --ignore-installed --upgrade google-assistant-sdk[samples]
     - Note the SUDO and extra flags to overwrite older libraries from ROS install. 
 
@@ -55,7 +55,7 @@ This module provides speech recognition and information lookup for the robot.
 ## Install Snowboy prerequisites:
 
 1. Install libatlas
-    * sudo -H apt-get install libatlas-base-dev
+    * sudo -H apt-get install -y libatlas-base-dev
 
 2. Install new version of SWIG - (sorry, this is messy)
   * see if a version of SWIG is already installed
