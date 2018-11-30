@@ -42,12 +42,22 @@ This module provides speech recognition and information lookup for the robot.
 
 
 ## Install Google Assistant:
+### NOTE:  This project uses "Google Assistant Service", not "Google Assistant Library"
+See instructions here: https://developers.google.com/assistant/sdk/guides/service/python/
 
 1.  sudo apt-get install -y portaudio19-dev libffi-dev libssl-dev
 2.  sudo -H python -m pip install --ignore-installed --upgrade google-assistant-sdk[samples]
     - Note the SUDO and extra flags to overwrite older libraries from ROS install. 
 
-3.  Test that Google Assistant works:
+3.  Follow directions here to configure your account:
+    - https://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account
+
+    - Note: sheldon install expects authorizaton files in these locations:
+    - ~/.config/google-oauthlib-tool/credentials.json
+    - ~/.config/googlesamples-assistant/device_config.json
+    - ~/.config/googlesamples-assistant/device_config_library.json
+    
+4.  Test that Google Assistant works:
     * googlesamples-assistant-pushtotalk --project-id robotspeechactions --device-model-id robotspeechactions-robot-0001
     - press ENTER and say "what time is it"
 
@@ -84,7 +94,8 @@ This module provides speech recognition and information lookup for the robot.
 
 2. Test Snowboy:
     * cd ~/dev/snowboy/examples/Python
-    * python demo.py resources/models/snowboy.umdl. (hear “ding” sound when recognized)
+    * python demo.py resources/models/snowboy.umdl  
+      (Say "snowboy", and hear “ding” sound when recognized)
 
   * Note: If _snowboydetect.so is not in ROS google_cloud_speech scripts directory, or
   * you want a newer version, do this:
@@ -96,7 +107,9 @@ This module provides speech recognition and information lookup for the robot.
   * If you see this error: "swift: not found", 
     it means text-to-speech has not been installed yet.  See Readme in audio_and_speech/cepstral_tts package.
 
-
+  * if you get a crash at this line: "import snowboydecoder",
+    it means the decoder was not copied.  do this:
+    - cp ~/dev/snowboy/swig/Python/_snowboydetect.so ~/catkin_robot/src/robot_speech/speech_recognition/google_assistant_speech/scripts 
 
 
 
