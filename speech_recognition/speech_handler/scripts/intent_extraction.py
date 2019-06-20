@@ -182,7 +182,7 @@ class SpeechHandler():
 
             else: 
                 # TODO: DO WE WANT THIS "OK" after every Command?          
-                self.say("okay.")
+                # self.say("okay.")
 
                 msg.commandState = command['intent']
                 if 'param1' in command:

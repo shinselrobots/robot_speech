@@ -698,7 +698,7 @@ class google_assistant_speech_recognition:
             if amount == '$amount':
                 amount = ''
             rospy.loginfo('******> Got Turn Command [%s]  [%s] ', turn_direction, amount)
-            turn_speed = '2.0'
+            turn_speed = '0.5'
             turn_command = '45' # Normal Turn
             if amount == 'SMALL':
                 turn_command = '30' # Small Turn
@@ -710,12 +710,12 @@ class google_assistant_speech_recognition:
 
         @self.device_handler.command('com.shinselrobots.commands.spin_left')
         def spin_left(param1):
-            turn_speed = '2.0'
+            turn_speed = '0.5'
             self.handle_behavior_command('TURN', '180', turn_speed, 'spinning left')
 
         @self.device_handler.command('com.shinselrobots.commands.spin_right')
         def spin_right(param1):
-            turn_speed = '2.0'
+            turn_speed = '0.5'
             self.handle_behavior_command('TURN', '-180', turn_speed, 'spinning right')
 
         @self.device_handler.command('com.shinselrobots.commands.stop')
@@ -737,6 +737,10 @@ class google_assistant_speech_recognition:
         @self.device_handler.command('com.shinselrobots.commands.hands_up')
         def hands_up(param1):
             self.handle_behavior_command('HANDS_UP', '','', 'ok')
+
+        @self.device_handler.command('com.shinselrobots.commands.shake_hands')
+        def shake_hands(param1):
+            self.handle_behavior_command('SHAKE_HANDS', '','', 'ok')
 
         @self.device_handler.command('com.shinselrobots.commands.arms_home')
         def arms_home(param1):
@@ -869,8 +873,7 @@ class google_assistant_speech_recognition:
             rospy.loginfo('**********************************************')
             if not use_google_assistant_voice: 
                 # assistant not acknowledging the command, so we do it
-                self.local_voice_say_text("i feel like i am a boy robot")
-
+                self.local_voice_say_text("i am a boy robot")
 
 
   

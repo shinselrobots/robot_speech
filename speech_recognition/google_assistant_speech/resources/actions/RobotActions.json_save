@@ -562,8 +562,7 @@
         "name": "com.shinselrobots.intents.sing_believer",
         "trigger": {
           "queryPatterns": [
-            "sing believer",
-            "sing us a song"
+            "sing believer"
           ]
         }
       },
@@ -736,45 +735,6 @@
               {
                 "deviceExecution": {
                   "command": "com.shinselrobots.commands.wave",
-                  "params": {
-                    "param1": ""
-                  }
-                }
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "com.shinselrobots.actions.shake_hands",
-      "availability": {
-        "deviceClasses": [
-          {
-            "assistantSdkDevice": {}
-          }
-        ]
-      },
-      "intent": {
-        "name": "com.shinselrobots.intents.shake_hands",
-        "trigger": {
-          "queryPatterns": [
-            "shake hands"
-          ]
-        }
-      },
-      "fulfillment": {
-        "staticFulfillment": {
-          "templatedResponse": {
-            "items": [
-              {
-                "simpleResponse": {
-                  "textToSpeech": "ok"
-                }
-              },
-              {
-                "deviceExecution": {
-                  "command": "com.shinselrobots.commands.shake_hands",
                   "params": {
                     "param1": ""
                   }

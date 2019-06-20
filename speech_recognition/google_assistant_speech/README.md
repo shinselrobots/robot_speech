@@ -43,6 +43,7 @@ This module provides speech recognition and information lookup for the robot.
 
 ## Install Google Assistant:
 ### NOTE:  This project uses "Google Assistant Service", not "Google Assistant Library"
+https://developers.google.com/assistant/sdk/overview#features
 See instructions here: https://developers.google.com/assistant/sdk/guides/service/python/
 
 1.  sudo apt-get install -y portaudio19-dev libffi-dev libssl-dev
@@ -61,6 +62,7 @@ See instructions here: https://developers.google.com/assistant/sdk/guides/servic
     * googlesamples-assistant-pushtotalk --project-id robotspeechactions --device-model-id robotspeechactions-robot-0001
     - press ENTER and say "what time is it"
 
+5.  Note: See README.md in ./resources/actions
 
 ## Install Snowboy prerequisites:
 

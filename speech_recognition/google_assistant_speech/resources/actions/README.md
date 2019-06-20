@@ -4,9 +4,13 @@
 - For editing JSON, see https://jsoneditoronline.org/  (or the editor of your choice)
 
 # Cheat Sheet:
-- download gactions app
+- download gactions app (if not already in .../google_assistant_speech/resources/actions)
+     https://developers.google.com/actions/tools/gactions-cli
 - chmod +x gactions
 
-- ./gactions update --action_package RobotActions.json --project robotspeechactions
-- ./gactions test --action_package RobotActions.json --project robotspeechactions
+-  Make Action Package accessible to the Google Assistant Server:
+   - ./gactions update --action_package RobotActions.json --project robotspeechactions
+
+-  Deploy the action package into test mode:
+   - ./gactions test --action_package RobotActions.json --project robotspeechactions
 
