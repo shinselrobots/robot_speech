@@ -1,9 +1,0 @@
-./README.md
-./speech_recognition/speech_handler/README.md
-./speech_recognition/speech_recognition_common/README.md
-./speech_recognition/google_assistant_speech/README.md
-./speech_recognition/google_assistant_speech/resources/actions/README.md
-./speech_recognition/google_cloud_speech/README.md
-./speech_recognition/houndify_cloud_speech/README.md
-./speech_recognition/houndify_cloud_speech/scripts/snowboy/README.md
-./audio_and_speech/cepstral_tts/README.md
